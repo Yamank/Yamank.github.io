@@ -1,2 +1,2 @@
-# yamank.github.io
+# Yamank.github.io
 My Personal Website.
