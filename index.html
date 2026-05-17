@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shashank Mishra | Senior IoT & AI Architect</title>
+  <meta name="description" content="Senior IoT Engineer with 10+ years of experience designing enterprise-grade connected ecosystems.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            heading: ['Space Grotesk', 'sans-serif'],
+            body: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --bg-primary: #F8FAFC;
+      --bg-surface: #FFFFFF;
+      --text-primary: #0F172A;
+      --text-secondary: #475569;
+      --accent-blue: #2563EB;
+      --accent-sky: #7DD3FC;
+      --border-subtle: #E2E8F0;
+    }
+    .dark {
+      --bg-primary: #0F172A;
+      --bg-surface: #1E293B;
+      --text-primary: #F8FAFC;
+      --text-secondary: #94A3B8;
+      --accent-blue: #3B82F6;
+      --accent-sky: #7DD3FC;
+      --border-subtle: #334155;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      transition: background 0.5s ease, color 0.5s ease;
+      overflow-x: hidden;
+    }
+    .glass-card {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-subtle);
+    }
+    .dark .glass-card {
+      background: rgba(30,41,59,0.5);
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, #7DD3FC, #2563EB);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .gradient-bg {
+      background: linear-gradient(135deg, #7DD3FC, #2563EB);
+    }
+    /* Loading screen */
+    #loader {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: var(--bg-primary);
+      transition: background 0.5s;
+    }
+    .loader-letter {
+      display: inline-block;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 3rem; font-weight: 700;
+      color: var(--text-primary);
+      opacity: 0; transform: translateY(20px);
+    }
+    @media (min-width: 768px) { .loader-letter { font-size: 5rem; } }
+    .loader-bar {
+      width: 256px; height: 2px;
+      background: var(--border-subtle);
+      border-radius: 9999px; overflow: hidden; margin-top: 2rem;
+    }
+    .loader-progress {
+      height: 100%; background: #2563EB;
+      width: 0%; transition: width 0.1s;
+    }
+    /* Particle canvas */
+    #particle-canvas {
+      position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    }
+    /* Custom cursor */
+    .custom-cursor {
+      position: fixed; width: 8px; height: 8px;
+      background: #2563EB; border-radius: 50%;
+      pointer-events: none; z-index: 99999;
+      mix-blend-mode: difference;
+      transition: width 0.2s, height 0.2s, background 0.2s;
+      transform: translate(-50%, -50%);
+    }
+    .custom-cursor.hovering {
+      width: 40px; height: 40px;
+      background: transparent;
+      border: 2px solid #2563EB;
+    }
+    @media (pointer: coarse) { .custom-cursor { display: none; } }
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-primary); }
+    ::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 3px; }
+    /* 3D skill card */
+    .skill-card {
+      transform-style: preserve-3d;
+      perspective: 1000px;
+      transition: box-shadow 0.3s, border-color 0.3s;
+    }
+    .skill-card:hover {
+      box-shadow: 0 20px 40px -10px rgba(125,211,252,0.25), 0 0 30px rgba(37,99,235,0.15);
+    }
+    /* Timeline */
+    .timeline-line {
+      position: absolute; left: 16px; top: 0; bottom: 0; width: 2px;
+      background: var(--border-subtle);
+    }
+    @media (min-width: 768px) {
+      .timeline-line { left: 50%; transform: translateX(-50%); }
+    }
+    .timeline-progress {
+      position: absolute; left: 0; top: 0; width: 100%;
+      background: linear-gradient(180deg, #2563EB, #7DD3FC);
+      height: 0%; transition: height 0.3s;
+    }
+    /* Theme toggle */
+    .theme-toggle-btn {
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 100;
+      width: 56px; height: 56px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.3s;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .theme-toggle-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 30px rgba(37,99,235,0.3);
+    }
+    /* Underline input */
+    .input-underline {
+      background: transparent;
+      border: none; border-bottom: 2px solid var(--border-subtle);
+      outline: none; width: 100%; padding: 0.75rem 0;
+      color: var(--text-primary); font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+    .input-underline:focus { border-color: #2563EB; }
+    .input-underline::placeholder { color: var(--text-secondary); opacity: 0.6; }
+    /* Magnetic button */
+    .magnetic-btn {
+      position: relative; display: inline-flex;
+      align-items: center; gap: 0.5rem;
+      transition: transform 0.15s ease-out;
+    }
+    /* Scroll indicator */
+    .scroll-indicator {
+      position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+    }
+    .scroll-line {
+      width: 2px; height: 48px;
+      background: var(--border-subtle);
+      position: relative; overflow: hidden;
+    }
+    .scroll-dot {
+      position: absolute; top: 0; left: 0; width: 100%; height: 12px;
+      background: #2563EB; border-radius: 9999px;
+      animation: scrollDot 2s ease-in-out infinite;
+    }
+    @keyframes scrollDot {
+      0% { transform: translateY(0); opacity: 1; }
+      100% { transform: translateY(40px); opacity: 0; }
+    }
+    /* Float animation */
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+    .animate-float { animation: float 6s ease-in-out infinite; }
+    /* Glow pulse */
+    @keyframes glowPulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(125,211,252,0.3); }
+      50% { box-shadow: 0 0 40px rgba(125,211,252,0.6); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div id="loader">
+    <div id="loader-name"></div>
+    <div class="loader-bar"><div class="loader-progress" id="loader-progress"></div></div>
+    <p id="loader-pct" style="margin-top:1rem;font-family:'JetBrains Mono',monospace;font-size:0.875rem;color:var(--text-secondary)">0%</p>
+  </div>
+
+  <!-- Particle Canvas -->
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- Custom Cursor -->
+  <div class="custom-cursor" id="cursor"></div>
+
+  <!-- Navigation -->
+  <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <button onclick="window.scrollTo({top:0,behavior:'smooth'})" class="font-heading text-lg font-bold tracking-wider" style="color:var(--text-primary)">SM</button>
+      <div class="hidden md:flex items-center gap-8">
+        <a href="#about" class="nav-link text-sm font-medium transition-colors hover:text-[#2563EB]" style="color:var(--text-secondary)">About</a>
+        <a href="#skills" class="nav-link text-sm font-medium transition-colors hover:text-[#2563EB]" style="color:var(--text-secondary)">Skills</a>
+        <a href="#experience" class="nav-link text-sm font-medium transition-colors hover:text-[#2563EB]" style="color:var(--text-secondary)">Experience</a>
+        <a href="#projects" class="nav-link text-sm font-medium transition-colors hover:text-[#2563EB]" style="color:var(--text-secondary)">Projects</a>
+        <a href="#contact" class="nav-link text-sm font-medium transition-colors hover:text-[#2563EB]" style="color:var(--text-secondary)">Contact</a>
+      </div>
+      <button onclick="toggleTheme()" id="nav-theme-btn" class="w-10 h-10 rounded-full flex items-center justify-center transition-colors" style="background:var(--bg-surface)" aria-label="Toggle theme">
+        <i class="fas fa-sun" id="theme-icon" style="color:#F59E0B"></i>
+      </button>
+      <button onclick="toggleMobileNav()" class="md:hidden" style="color:var(--text-primary)" aria-label="Menu">
+        <i class="fas fa-bars" id="mobile-menu-icon"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Nav -->
+  <div id="mobile-nav" class="fixed inset-0 z-40 hidden" style="background:var(--bg-primary)">
+    <div class="flex flex-col items-center gap-8 pt-32">
+      <a href="#about" onclick="toggleMobileNav()" class="font-heading text-2xl font-medium" style="color:var(--text-primary)">About</a>
+      <a href="#skills" onclick="toggleMobileNav()" class="font-heading text-2xl font-medium" style="color:var(--text-primary)">Skills</a>
+      <a href="#experience" onclick="toggleMobileNav()" class="font-heading text-2xl font-medium" style="color:var(--text-primary)">Experience</a>
+      <a href="#projects" onclick="toggleMobileNav()" class="font-heading text-2xl font-medium" style="color:var(--text-primary)">Projects</a>
+      <a href="#contact" onclick="toggleMobileNav()" class="font-heading text-2xl font-medium" style="color:var(--text-primary)">Contact</a>
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="relative min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden">
+    <div class="text-center max-w-4xl mx-auto" style="opacity:0" id="hero-content">
+      <h1 class="font-heading text-[12vw] md:text-[10vw] lg:text-[8vw] font-bold uppercase leading-none tracking-tight" style="color:var(--text-primary)">Shashank Mishra</h1>
+      <div class="w-24 h-[3px] bg-[#2563EB] mx-auto my-6" style="transform:scaleX(0);transform-origin:center" id="hero-line"></div>
+      <p class="text-lg md:text-xl tracking-[0.3em] uppercase font-medium" style="color:var(--accent-sky)">Senior IoT & AI Architect</p>
+      <p class="mt-6 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed" style="color:var(--text-secondary)">Designing enterprise-grade connected ecosystems that scale from factory floors to global operations.</p>
+      <div class="flex flex-wrap items-center justify-center gap-4 mt-10">
+        <a href="#projects" class="magnetic-btn bg-[#2563EB] text-white rounded-full px-8 py-4 font-medium hover:bg-[#1D4ED8] transition-colors shadow-lg shadow-blue-500/25">
+          View Projects <i class="fas fa-arrow-down ml-2"></i>
+        </a>
+        <a href="#resume" class="magnetic-btn rounded-full px-8 py-4 font-medium border-2 border-[#2563EB] hover:bg-[#2563EB] hover:text-white transition-all" style="color:#2563EB">
+          <i class="fas fa-download mr-2"></i> Download Resume
+        </a>
+        <a href="#contact" class="magnetic-btn rounded-full px-8 py-4 font-medium border-2 border-[#2563EB] hover:bg-[#2563EB] hover:text-white transition-all" style="color:#2563EB">
+          <i class="fas fa-envelope mr-2"></i> Contact Me
+        </a>
+      </div>
+    </div>
+    <div class="scroll-indicator">
+      <div class="scroll-line"><div class="scroll-dot"></div></div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="py-32 px-6">
+    <div class="max-w-7xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-16">
+        <div class="lg:col-span-5 gs-reveal">
+          <h2 class="font-heading text-5xl md:text-6xl font-bold mb-8" style="color:var(--text-primary)">ABOUT<br><span class="text-[#2563EB]">ME</span></h2>
+          <div class="w-48 h-48 md:w-64 md:h-64 rounded-2xl overflow-hidden mx-auto lg:mx-0 mb-8">
+            <div class="w-full h-full gradient-bg flex items-center justify-center">
+              <span class="font-heading text-6xl md:text-8xl font-bold text-white">SM</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 text-sm" style="color:var(--text-secondary)">
+            <i class="fas fa-map-marker-alt text-[#2563EB]"></i>
+            <span>Bengaluru, India</span>
+          </div>
+        </div>
+        <div class="lg:col-span-7">
+          <p class="text-lg md:text-xl leading-relaxed mb-10 gs-reveal" style="color:var(--text-secondary)">
+            Senior IoT Engineer with 10+ years of experience designing and delivering industrial IoT solutions using PTC ThingWorx, including custom ThingWorx Java Extensions for UI components, data export, and security. Proven expertise in ThingWorx platform development, extension lifecycle management, scalable data handling, dashboarding, and system integration. Strong background in Azure IoT, PostgreSQL, SQL Server, and event-driven architectures, with hands-on experience supporting large-scale, production-grade deployments in manufacturing environments.
+          </p>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+            <div class="glass-card rounded-2xl p-6 text-center gs-reveal">
+              <div class="font-heading text-3xl md:text-4xl font-bold text-[#2563EB]">10+</div>
+              <div class="text-xs mt-2 uppercase tracking-wider" style="color:var(--text-secondary)">Years Experience</div>
+            </div>
+            <div class="glass-card rounded-2xl p-6 text-center gs-reveal">
+              <div class="font-heading text-3xl md:text-4xl font-bold text-[#2563EB]">60+</div>
+              <div class="text-xs mt-2 uppercase tracking-wider" style="color:var(--text-secondary)">Sites Scaled</div>
+            </div>
+            <div class="glass-card rounded-2xl p-6 text-center gs-reveal">
+              <div class="font-heading text-3xl md:text-4xl font-bold text-[#2563EB]">3</div>
+              <div class="text-xs mt-2 uppercase tracking-wider" style="color:var(--text-secondary)">Companies</div>
+            </div>
+            <div class="glass-card rounded-2xl p-6 text-center gs-reveal">
+              <div class="font-heading text-3xl md:text-4xl font-bold text-[#2563EB]">5</div>
+              <div class="text-xs mt-2 uppercase tracking-wider" style="color:var(--text-secondary)">Certifications</div>
+            </div>
+          </div>
+          <div class="gs-reveal">
+            <h3 class="font-heading text-xl font-bold mb-4" style="color:var(--text-primary)"><i class="fas fa-award text-[#2563EB] mr-2"></i>Certifications</h3>
+            <div class="flex flex-wrap gap-2">
+              <span class="cert-badge px-4 py-2 rounded-full text-xs font-medium" style="background:var(--bg-surface);color:var(--accent-blue);border:1px solid var(--border-subtle)">Azure IoT Developer Specialty (AZ-220)</span>
+              <span class="cert-badge px-4 py-2 rounded-full text-xs font-medium" style="background:var(--bg-surface);color:var(--accent-blue);border:1px solid var(--border-subtle)">Azure AI Engineer (AI-102)</span>
+              <span class="cert-badge px-4 py-2 rounded-full text-xs font-medium" style="background:var(--bg-surface);color:var(--accent-blue);border:1px solid var(--border-subtle)">Azure AI Fundamentals (AI-900)</span>
+              <span class="cert-badge px-4 py-2 rounded-full text-xs font-medium" style="background:var(--bg-surface);color:var(--accent-blue);border:1px solid var(--border-subtle)">Azure Fundamentals (AZ-900)</span>
+              <span class="cert-badge px-4 py-2 rounded-full text-xs font-medium" style="background:var(--bg-surface);color:var(--accent-blue);border:1px solid var(--border-subtle)">Infosys Certified IoT Professional</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills Section -->
+  <section id="skills" class="py-32 px-6">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-16 gs-reveal">
+        <h2 class="font-heading text-5xl md:text-6xl font-bold" style="color:var(--text-primary)">TECHNICAL <span class="text-[#2563EB]">ARSENAL</span></h2>
+        <p class="mt-4 text-lg max-w-2xl mx-auto" style="color:var(--text-secondary)">A comprehensive toolkit built over a decade of enterprise IoT development</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="skills-grid"></div>
+    </div>
+  </section>
+
+  <!-- Experience Section -->
+  <section id="experience" class="py-32 px-6">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-20 gs-reveal">
+        <h2 class="font-heading text-5xl md:text-6xl font-bold" style="color:var(--text-primary)">PROFESSIONAL <span class="text-[#2563EB]">JOURNEY</span></h2>
+        <p class="mt-4 text-lg" style="color:var(--text-secondary)">A decade of building industrial IoT solutions across global enterprises</p>
+      </div>
+      <div class="relative" id="timeline-container"></div>
+    </div>
+  </section>
+
+  <!-- Projects Section -->
+  <section id="projects" class="py-32 px-6">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-16 gs-reveal">
+        <h2 class="font-heading text-5xl md:text-6xl font-bold" style="color:var(--text-primary)">FEATURED <span class="text-[#2563EB]">PROJECTS</span></h2>
+        <p class="mt-4 text-lg max-w-2xl mx-auto" style="color:var(--text-secondary)">Enterprise IoT platforms and solutions that transformed industrial operations</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8" id="projects-grid"></div>
+    </div>
+  </section>
+
+  <!-- Resume Download Section -->
+  <section id="resume" class="py-32 px-6">
+    <div class="max-w-3xl mx-auto text-center gs-reveal">
+      <i class="fas fa-file-alt text-5xl text-[#2563EB] mb-6"></i>
+      <h2 class="font-heading text-4xl md:text-5xl font-bold mb-4" style="color:var(--text-primary)">WANT THE FULL <span class="text-[#2563EB]">PICTURE</span>?</h2>
+      <p class="text-lg mb-10" style="color:var(--text-secondary)">Download my complete resume to learn more about my experience, skills, and achievements.</p>
+      <a href="resume/shashank-mishra-resume.pdf" download class="magnetic-btn gradient-bg text-white rounded-full px-12 py-5 text-lg font-medium inline-flex items-center gap-3 hover:shadow-xl hover:shadow-blue-500/30 transition-all" onclick="showToast('Resume downloading...')">
+        <i class="fas fa-download"></i> Download Resume <i class="fas fa-arrow-down"></i>
+      </a>
+      <p class="mt-6 text-sm" style="color:var(--text-secondary)">PDF format &bull; Updated May 2025</p>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="py-32 px-6">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-16 gs-reveal">
+        <h2 class="font-heading text-5xl md:text-6xl font-bold" style="color:var(--text-primary)">LET'S <span class="text-[#2563EB]">CONNECT</span></h2>
+        <p class="mt-4 text-lg" style="color:var(--text-secondary)">Have a project in mind or want to discuss IoT architecture?</p>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+        <div class="gs-reveal">
+          <h3 class="font-heading text-2xl font-bold mb-8" style="color:var(--text-primary)">Get in Touch</h3>
+          <div class="space-y-4">
+            <a href="mailto:mishra0shashank@gmail.com" class="flex items-center gap-4 p-4 rounded-xl transition-all hover:scale-[1.02]" style="background:var(--bg-surface)">
+              <div class="w-12 h-12 rounded-full bg-[#2563EB]/10 flex items-center justify-center"><i class="fas fa-envelope text-[#2563EB]"></i></div>
+              <div><div class="text-sm" style="color:var(--text-secondary)">Email</div><div class="font-medium" style="color:var(--text-primary)">mishra0shashank@gmail.com</div></div>
+            </a>
+            <div class="flex items-center gap-4 p-4 rounded-xl" style="background:var(--bg-surface)">
+              <div class="w-12 h-12 rounded-full bg-[#2563EB]/10 flex items-center justify-center"><i class="fas fa-phone text-[#2563EB]"></i></div>
+              <div><div class="text-sm" style="color:var(--text-secondary)">Phone</div><div class="font-medium" style="color:var(--text-primary)">+91-9528505442</div></div>
+            </div>
+            <div class="flex items-center gap-4 p-4 rounded-xl" style="background:var(--bg-surface)">
+              <div class="w-12 h-12 rounded-full bg-[#2563EB]/10 flex items-center justify-center"><i class="fas fa-map-marker-alt text-[#2563EB]"></i></div>
+              <div><div class="text-sm" style="color:var(--text-secondary)">Location</div><div class="font-medium" style="color:var(--text-primary)">Bengaluru, India</div></div>
+            </div>
+          </div>
+          <div class="mt-10">
+            <h4 class="font-medium mb-4" style="color:var(--text-secondary)">Follow Me</h4>
+            <div class="flex items-center gap-4">
+              <a href="https://linkedin.com/in/imshashank" target="_blank" class="w-12 h-12 rounded-full flex items-center justify-center transition-all hover:scale-110" style="background:var(--bg-surface);color:var(--accent-blue)"><i class="fab fa-linkedin-in text-xl"></i></a>
+              <a href="https://github.com/imshashank" target="_blank" class="w-12 h-12 rounded-full flex items-center justify-center transition-all hover:scale-110" style="background:var(--bg-surface);color:var(--accent-blue)"><i class="fab fa-github text-xl"></i></a>
+            </div>
+          </div>
+        </div>
+        <div class="gs-reveal">
+          <form onsubmit="handleSubmit(event)">
+            <div class="space-y-6">
+              <input type="text" name="name" placeholder="Your Name" required class="input-underline">
+              <input type="email" name="email" placeholder="Your Email" required class="input-underline">
+              <input type="text" name="subject" placeholder="Subject" required class="input-underline">
+              <textarea name="message" placeholder="Your Message" required rows="4" class="input-underline resize-none"></textarea>
+              <button type="submit" id="submit-btn" class="w-full bg-[#2563EB] text-white rounded-full py-4 font-medium flex items-center justify-center gap-2 hover:bg-[#1D4ED8] transition-colors shadow-lg shadow-blue-500/25">
+                <i class="fas fa-paper-plane"></i> <span id="submit-text">Send Message</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-8 px-6" style="border-top:1px solid var(--border-subtle)">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <p class="text-sm" style="color:var(--text-secondary)">&copy; 2025 Shashank Mishra. All rights reserved.</p>
+      <p class="text-sm" style="color:var(--text-secondary)">Built with Three.js, GSAP & Tailwind CSS</p>
+    </div>
+  </footer>
+
+  <!-- Theme Toggle Button -->
+  <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle dark mode">
+    <i class="fas fa-sun text-xl" id="toggle-sun" style="color:#F59E0B"></i>
+    <i class="fas fa-moon text-xl hidden" id="toggle-moon" style="color:#7DD3FC"></i>
+  </button>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full font-medium text-sm text-white bg-[#2563EB] shadow-lg opacity-0 pointer-events-none transition-all duration-300 z-50" style="transform:translateX(-50%) translateY(20px)"></div>
+
+  <script>
+
+// ========== THEME MANAGEMENT ==========
+let isDark = false;
+function toggleTheme() {
+  isDark = !isDark;
+  document.documentElement.classList.toggle('dark');
+  const sun = document.getElementById('toggle-sun');
+  const moon = document.getElementById('toggle-moon');
+  const icon = document.getElementById('theme-icon');
+  if (sun && moon) {
+    sun.classList.toggle('hidden');
+    moon.classList.toggle('hidden');
+  }
+  if (icon) {
+    icon.className = isDark ? 'fas fa-moon' : 'fas fa-sun';
+    icon.style.color = isDark ? '#7DD3FC' : '#F59E0B';
+  }
+  updateParticleColors();
+}
+
+// ========== LOADING SCREEN ==========
+const nameText = "SHASHANK MISHRA";
+const loaderName = document.getElementById('loader-name');
+nameText.split('').forEach((char, i) => {
+  const span = document.createElement('span');
+  span.className = 'loader-letter';
+  span.textContent = char === ' ' ? '\u00A0' : char;
+  span.style.animation = `none`;
+  loaderName.appendChild(span);
+});
+
+let progress = 0;
+const loaderProgress = document.getElementById('loader-progress');
+const loaderPct = document.getElementById('loader-pct');
+const loaderLetters = document.querySelectorAll('.loader-letter');
+
+const loadInterval = setInterval(() => {
+  progress += 2;
+  if (loaderProgress) loaderProgress.style.width = progress + '%';
+  if (loaderPct) loaderPct.textContent = progress + '%';
+  if (progress >= 100) {
+    clearInterval(loadInterval);
+    setTimeout(() => {
+      const loader = document.getElementById('loader');
+      if (loader) {
+        loader.style.transform = 'translateY(-100%)';
+        loader.style.transition = 'transform 0.8s cubic-bezier(0.76,0,0.24,1)';
+        setTimeout(() => {
+          loader.style.display = 'none';
+          initHeroAnimation();
+        }, 800);
+      }
+    }, 400);
+  }
+  // Stagger letter reveals
+  const letterIndex = Math.floor((progress / 100) * loaderLetters.length);
+  loaderLetters.forEach((letter, i) => {
+    if (i <= letterIndex) {
+      letter.style.opacity = '1';
+      letter.style.transform = 'translateY(0)';
+      letter.style.transition = `opacity 0.3s ease ${i * 0.04}s, transform 0.3s ease ${i * 0.04}s`;
+    }
+  });
+}, 30);
+
+function initHeroAnimation() {
+  const hero = document.getElementById('hero-content');
+  const line = document.getElementById('hero-line');
+  if (hero) {
+    hero.style.transition = 'opacity 0.8s ease';
+    hero.style.opacity = '1';
+  }
+  if (line) {
+    setTimeout(() => {
+      line.style.transition = 'transform 0.6s ease';
+      line.style.transform = 'scaleX(1)';
+    }, 300);
+  }
+}
+
+// ========== PARTICLE BACKGROUND (Three.js) ==========
+let scene, camera, renderer, planeMesh, pointsSystem;
+let time = 0;
+let mouseX = 0, mouseY = 0;
+
+// Simplex noise
+const F3 = 1/3, G3 = 1/6;
+const grad3 = [[1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],[1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],[0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]];
+const p = new Uint8Array(256);
+for (let i=0;i<256;i++) p[i] = i;
+// Shuffle
+for (let i=255;i>0;i--) { const j = Math.floor(Math.random()*(i+1)); [p[i],p[j]] = [p[j],p[i]]; }
+const perm = new Uint8Array(512);
+for (let i=0;i<512;i++) perm[i] = p[i&255];
+
+function dot3(g, x, y, z) { return g[0]*x + g[1]*y + g[2]*z; }
+
+function simplexNoise3D(xin, yin, zin) {
+  const s = (xin+yin+zin)*F3;
+  const i = Math.floor(xin+s), j = Math.floor(yin+s), k = Math.floor(zin+s);
+  const t = (i+j+k)*G3;
+  const X0 = i-t, Y0 = j-t, Z0 = k-t;
+  const x0 = xin-X0, y0 = yin-Y0, z0 = zin-Z0;
+  let i1, j1, k1, i2, j2, k2;
+  if (x0>=y0) { if (y0>=z0) {i1=1;j1=0;k1=0;i2=1;j2=1;k2=0} else if (x0>=z0) {i1=1;j1=0;k1=0;i2=1;j2=0;k2=1} else {i1=0;j1=0;k1=1;i2=1;j2=0;k2=1} }
+  else { if (y0<z0) {i1=0;j1=0;k1=1;i2=0;j2=1;k2=1} else if (x0<z0) {i1=0;j1=1;k1=0;i2=0;j2=1;k2=1} else {i1=0;j1=1;k1=0;i2=1;j2=1;k2=0} }
+  const x1=x0-i1+G3, y1=y0-j1+G3, z1=z0-k1+G3;
+  const x2=x0-i2+2*G3, y2=y0-j2+2*G3, z2=z0-k2+2*G3;
+  const x3=x0-1+3*G3, y3=y0-1+3*G3, z3=z0-1+3*G3;
+  const ii=i&255, jj=j&255, kk=k&255;
+  const gi0=perm[ii+perm[jj+perm[kk]]]%12;
+  const gi1=perm[ii+i1+perm[jj+j1+perm[kk+k1]]]%12;
+  const gi2=perm[ii+i2+perm[jj+j2+perm[kk+k2]]]%12;
+  const gi3=perm[ii+1+perm[jj+1+perm[kk+1]]]%12;
+  let n0,n1,n2,n3;
+  let t0=0.6-x0*x0-y0*y0-z0*z0;
+  if (t0<0) n0=0; else { t0*=t0; n0=t0*t0*dot3(grad3[gi0],x0,y0,z0); }
+  let t1=0.6-x1*x1-y1*y1-z1*z1;
+  if (t1<0) n1=0; else { t1*=t1; n1=t1*t1*dot3(grad3[gi1],x1,y1,z1); }
+  let t2=0.6-x2*x2-y2*y2-z2*z2;
+  if (t2<0) n2=0; else { t2*=t2; n2=t2*t2*dot3(grad3[gi2],x2,y2,z2); }
+  let t3=0.6-x3*x3-y3*y3-z3*z3;
+  if (t3<0) n3=0; else { t3*=t3; n3=t3*t3*dot3(grad3[gi3],x3,y3,z3); }
+  return 32*(n0+n1+n2+n3);
+}
+
+function initParticles() {
+  const canvas = document.getElementById('particle-canvas');
+  if (!canvas) return;
+
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.set(0, 5, 10);
+
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  // Wave plane
+  const planeGeo = new THREE.PlaneGeometry(30, 30, 128, 128);
+  const planeMat = new THREE.MeshBasicMaterial({
+    color: 0x7DD3FC, wireframe: true, transparent: true, opacity: 0.06, side: THREE.DoubleSide
+  });
+  planeMesh = new THREE.Mesh(planeGeo, planeMat);
+  planeMesh.rotation.x = -Math.PI / 2.5;
+  planeMesh.position.y = -2;
+  scene.add(planeMesh);
+
+  // Floating particles
+  const particleCount = 150;
+  const positions = new Float32Array(particleCount * 3);
+  for (let i = 0; i < particleCount; i++) {
+    positions[i*3] = (Math.random()-0.5)*25;
+    positions[i*3+1] = (Math.random()-0.5)*15;
+    positions[i*3+2] = (Math.random()-0.5)*15;
+  }
+  const pointsGeo = new THREE.BufferGeometry();
+  pointsGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  const pointsMat = new THREE.PointsMaterial({ color: 0x2563EB, size: 0.05, transparent: true, opacity: 0.3, sizeAttenuation: true });
+  pointsSystem = new THREE.Points(pointsGeo, pointsMat);
+  scene.add(pointsSystem);
+
+  // Ambient light
+  scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+  scene.add(new THREE.PointLight(0x7DD3FC, 1, 20));
+
+  animateParticles();
+}
+
+function animateParticles() {
+  requestAnimationFrame(animateParticles);
+  time += 0.005;
+
+  if (planeMesh) {
+    const positions = planeMesh.geometry.attributes.position;
+    const count = positions.count;
+    for (let i = 0; i < count; i++) {
+      const x = positions.getX(i);
+      const y = positions.getY(i);
+      const elevation = simplexNoise3D(x*0.15 + mouseX*0.5, y*0.15 + mouseY*0.5, time*0.3) * 0.8;
+      positions.setZ(i, elevation);
+    }
+    positions.needsUpdate = true;
+    // Update colors based on theme
+    planeMesh.material.color.setHex(isDark ? 0x2563EB : 0x7DD3FC);
+    planeMesh.material.opacity = isDark ? 0.12 : 0.06;
+  }
+
+  if (pointsSystem) {
+    pointsSystem.rotation.y = time * 0.3;
+    pointsSystem.material.color.setHex(isDark ? 0x7DD3FC : 0x2563EB);
+    pointsSystem.material.opacity = isDark ? 0.6 : 0.3;
+  }
+
+  // Subtle camera movement based on mouse
+  camera.position.x += (mouseX * 3 - camera.position.x) * 0.02;
+  camera.position.y += (5 + mouseY * 1 - camera.position.y) * 0.02;
+  camera.lookAt(0, 0, 0);
+
+  renderer.render(scene, camera);
+}
+
+function updateParticleColors() {
+  // Handled in animate loop
+}
+
+window.addEventListener('resize', () => {
+  if (camera && renderer) {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+});
+
+document.addEventListener('mousemove', (e) => {
+  mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+  mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+});
+
+// ========== CUSTOM CURSOR ==========
+const cursor = document.getElementById('cursor');
+let cursorX = 0, cursorY = 0;
+document.addEventListener('mousemove', (e) => {
+  cursorX = e.clientX; cursorY = e.clientY;
+  if (cursor) {
+    cursor.style.left = cursorX + 'px';
+    cursor.style.top = cursorY + 'px';
+  }
+});
+document.querySelectorAll('a, button, [role="button"], input, textarea').forEach(el => {
+  el.addEventListener('mouseenter', () => cursor?.classList.add('hovering'));
+  el.addEventListener('mouseleave', () => cursor?.classList.remove('hovering'));
+});
+
+// ========== NAVIGATION SCROLL ==========
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('navbar');
+  if (window.scrollY > 50) {
+    nav.classList.add('scrolled');
+    nav.style.background = isDark ? 'rgba(15,23,42,0.8)' : 'rgba(248,250,252,0.8)';
+    nav.style.backdropFilter = 'blur(12px)';
+    nav.style.borderBottom = `1px solid ${isDark ? '#334155' : '#E2E8F0'}`;
+  } else {
+    nav.style.background = 'transparent';
+    nav.style.backdropFilter = 'none';
+    nav.style.borderBottom = 'none';
+  }
+});
+
+function toggleMobileNav() {
+  const nav = document.getElementById('mobile-nav');
+  const icon = document.getElementById('mobile-menu-icon');
+  nav.classList.toggle('hidden');
+  icon.className = nav.classList.contains('hidden') ? 'fas fa-bars' : 'fas fa-times';
+}
+
+// ========== SKILLS DATA ==========
+const skillsData = [
+  { title: "ThingWorx & PTC", icon: "fa-microchip", color: "#2563EB", skills: ["ThingWorx Foundation 9.7.0","ThingWorx Flow 9.3.8","ThingWorx Navigate 9.3.4","Custom Extensions","Vuforia Studio 9.13","Creo Illustrate 9"] },
+  { title: "IoT, Cloud & Integration", icon: "fa-cloud", color: "#7DD3FC", skills: ["Azure IoT Hub","Azure DevOps","CI/CD Pipelines","REST APIs","JSON Processing","Event-Driven Architecture"] },
+  { title: "Databases", icon: "fa-database", color: "#3B82F6", skills: ["PostgreSQL","SQL Server","InfoTable Optimization","Batch Data Handling","Enterprise Reporting"] },
+  { title: "Programming & Tools", icon: "fa-code", color: "#60A5FA", skills: ["JavaScript","Java","Python","Git"] },
+  { title: "AI / Analytics", icon: "fa-brain", color: "#93C5FD", skills: ["Azure Machine Learning","Natural Language Processing","Computer Vision"] },
+];
+
+const skillsGrid = document.getElementById('skills-grid');
+skillsData.forEach((cat, i) => {
+  const card = document.createElement('div');
+  card.className = 'skill-card rounded-2xl p-6 md:p-8 gs-reveal';
+  card.style.cssText = `background:var(--bg-surface);border:1px solid var(--border-subtle);transition:all 0.3s;`;
+  card.innerHTML = `
+    <div class="flex items-center gap-3 mb-5">
+      <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:${cat.color}20">
+        <i class="fas ${cat.icon}" style="color:${cat.color}"></i>
+      </div>
+      <h3 class="font-heading text-lg font-bold" style="color:var(--text-primary)">${cat.title}</h3>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      ${cat.skills.map(s => `<span class="skill-pill px-3 py-1.5 rounded-full text-xs font-medium" style="background:var(--bg-primary);color:var(--text-secondary);border:1px solid var(--border-subtle);transition:all 0.3s">${s}</span>`).join('')}
+    </div>
+  `;
+  card.addEventListener('mousemove', (e) => {
+    const rect = card.getBoundingClientRect();
+    const x = (e.clientY - rect.top - rect.height/2) / 20;
+    const y = -(e.clientX - rect.left - rect.width/2) / 20;
+    card.style.transform = `perspective(1000px) rotateX(${Math.max(-10,Math.min(10,x))}deg) rotateY(${Math.max(-10,Math.min(10,y))}deg) translateZ(10px)`;
+    card.querySelectorAll('.skill-pill').forEach(p => {
+      p.style.background = '#2563EB';
+      p.style.color = '#fff';
+    });
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateZ(0)';
+    card.querySelectorAll('.skill-pill').forEach(p => {
+      p.style.background = 'var(--bg-primary)';
+      p.style.color = 'var(--text-secondary)';
+    });
+  });
+  skillsGrid.appendChild(card);
+});
+
+// ========== EXPERIENCE DATA ==========
+const experienceData = [
+  { company: "Volvo Group India Private Limited", role: "Professional Software Engineer", location: "Bengaluru, India", start: "Apr 2022", end: "Present", current: true, responsibilities: ["Design and develop enterprise-grade ThingWorx applications for industrial and engineering use cases","Contribute to ThingWorx architecture decisions focusing on scalability, security, and maintainability","Build ThingWorx services, DataShapes, ThingTemplates, and Mashups supporting scalable architectures","Optimize services for performance and memory usage in high-volume environments","Developed a custom ThingWorx Authenticator Extension for enterprise authentication","Integrate ThingWorx applications with PostgreSQL and external systems using ODATA REST APIs","Support production deployments, upgrades, validation, and troubleshooting"] },
+  { company: "Infosys Limited", role: "Senior Associate Consultant", location: "Chandigarh", start: "Jul 2020", end: "Apr 2022", current: false, responsibilities: ["Designed and delivered a centralized ThingWorx-based Bias Manager for PepsiCo (Frito-Lay)","Built a Custom PDF Export Extension for secure, formatted export of industrial reports","Scaled deployments from 14 initial sites to 60+ global sites","Integrated SQL Server-based centralized databases for enterprise reporting","Managed team responses to incidents and requests against SLA"] },
+  { company: "Infosys Limited", role: "Associate Consultant", location: "Chandigarh", start: "May 2019", end: "Jun 2020", current: false, responsibilities: ["Requirement gathering and writing requirement documents for TE Connectivity client","Engaged in Pre-Sales activities: Proof-Of-Concepts and feasibility tests","Developed a Custom UI Line Chart Extension using Plotly.js for time-series data visualization"] },
+  { company: "Capgemini Technology Services", role: "Associate Consultant", location: "Bengaluru", start: "Feb 2016", end: "Apr 2019", current: false, responsibilities: ["Built dashboards representing OEE values for different machines in production sites","Designed an Augmented Reality PoC on ThingWorx Studio for electrical switch assembly training","Created demo mashups and estimations for new requirements"] },
+];
+
+const timelineContainer = document.getElementById('timeline-container');
+timelineContainer.innerHTML = '<div class="timeline-line"><div class="timeline-progress" id="timeline-progress"></div></div>';
+
+experienceData.forEach((job, i) => {
+  const entry = document.createElement('div');
+  entry.className = `relative flex items-start mb-16 ${i%2===0?'md:flex-row':'md:flex-row-reverse'}`;
+  entry.innerHTML = `
+    <div class="absolute left-4 md:left-1/2 -translate-x-1/2 z-10">
+      <div class="w-4 h-4 rounded-full bg-[#2563EB] border-4" style="border-color:var(--bg-primary)"></div>
+    </div>
+    <div class="ml-12 md:ml-0 md:w-[45%] ${i%2===0?'md:pr-12':'md:pl-12'}">
+      <div class="glass-card rounded-2xl p-6 md:p-8 hover:-translate-y-1 transition-all duration-300">
+        <div class="flex items-center gap-2 mb-2">
+          <i class="fas fa-briefcase text-[#2563EB]"></i>
+          <h3 class="font-heading text-xl font-bold" style="color:var(--text-primary)">${job.company}</h3>
+        </div>
+        <div class="font-medium mb-3 ${isDark?'text-[#7DD3FC]':'text-[#2563EB]'}" style="color:var(--accent-blue)">${job.role}</div>
+        <div class="flex flex-wrap items-center gap-4 text-sm mb-4 font-mono" style="color:var(--text-secondary)">
+          <span><i class="far fa-calendar mr-1"></i>${job.start} - ${job.end}</span>
+          <span><i class="fas fa-map-marker-alt mr-1"></i>${job.location}</span>
+        </div>
+        ${job.current?'<span class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-green-500/10 text-green-500 mb-4">Current</span>':''}
+        <ul class="space-y-2">
+          ${job.responsibilities.map(r => `<li class="flex items-start gap-2 text-sm" style="color:var(--text-secondary)"><span class="text-[#2563EB] mt-1">&bull;</span>${r}</li>`).join('')}
+        </ul>
+      </div>
+    </div>
+  `;
+  timelineContainer.appendChild(entry);
+});
+
+// ========== PROJECTS DATA ==========
+const projectsData = [
+  { title: "PepsiCo Bias Manager Platform", desc: "A centralized ThingWorx-based IoT platform that transformed standalone applications into a unified industrial system, scaling from 14 to 60+ global manufacturing sites and saving significant operational costs.", img: "images/project-pepsico.jpg", tech: ["ThingWorx","SQL Server","Java","REST APIs"] },
+  { title: "OEE Dashboard Platform", desc: "Real-time Overall Equipment Effectiveness dashboards for manufacturing floors, enabling data-driven decision making with visual analytics for machine performance, availability, and quality metrics.", img: "images/project-oee.jpg", tech: ["ThingWorx","PostgreSQL","JavaScript","Analytics"] },
+  { title: "Enterprise Auth Extension", desc: "A custom ThingWorx Authenticator Extension that integrated enterprise authentication mechanisms into the platform, improving security posture and access control across distributed manufacturing environments.", img: "images/project-auth.jpg", tech: ["ThingWorx","Java","Security","OAuth"] },
+  { title: "AR Training Interface", desc: "An Augmented Reality proof-of-concept built on ThingWorx Studio that guided operators through electrical switch assembly procedures, reducing training time and improving workforce onboarding.", img: "images/project-ar.jpg", tech: ["ThingWorx Studio","Vuforia","AR","3D Modeling"] },
+];
+
+const projectsGrid = document.getElementById('projects-grid');
+projectsData.forEach((project, i) => {
+  const card = document.createElement('div');
+  card.className = 'group rounded-2xl overflow-hidden gs-reveal';
+  card.style.cssText = `background:var(--bg-surface);border:1px solid var(--border-subtle);box-shadow:0 4px 20px rgba(0,0,0,0.05);transition:transform 0.15s ease-out;`;
+  card.innerHTML = `
+    <div class="relative h-52 overflow-hidden">
+      <img src="${project.img}" alt="${project.title}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+      <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+    </div>
+    <div class="p-6">
+      <h3 class="font-heading text-xl font-bold mb-2" style="color:var(--text-primary)">${project.title}</h3>
+      <p class="text-sm leading-relaxed mb-4" style="color:var(--text-secondary)">${project.desc}</p>
+      <div class="flex flex-wrap gap-2 mb-4">
+        ${project.tech.map(t => `<span class="px-3 py-1 rounded-full text-xs font-medium" style="background:${isDark?'rgba(37,99,235,0.2)':'#EFF6FF'};color:#2563EB">${t}</span>`).join('')}
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="flex items-center gap-2 text-sm font-medium" style="color:var(--text-secondary)"><i class="fab fa-github"></i> Code</span>
+        <span class="flex items-center gap-2 text-sm font-medium" style="color:var(--text-secondary)"><i class="fas fa-external-link-alt"></i> Live Demo</span>
+      </div>
+    </div>
+  `;
+  card.addEventListener('mousemove', (e) => {
+    const rect = card.getBoundingClientRect();
+    const x = (e.clientY - rect.top - rect.height/2) / 25;
+    const y = -(e.clientX - rect.left - rect.width/2) / 25;
+    card.style.transform = `perspective(1000px) rotateX(${Math.max(-8,Math.min(8,x))}deg) rotateY(${Math.max(-8,Math.min(8,y))}deg)`;
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+  });
+  projectsGrid.appendChild(card);
+});
+
+// ========== SCROLL ANIMATIONS (GSAP) ==========
+function initScrollAnimations() {
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Reveal elements
+  document.querySelectorAll('.gs-reveal').forEach(el => {
+    gsap.fromTo(el,
+      { opacity: 0, y: 50 },
+      {
+        opacity: 1, y: 0, duration: 0.8, ease: 'power3.out',
+        scrollTrigger: { trigger: el, start: 'top 85%', once: true }
+      }
+    );
+  });
+
+  // Timeline progress
+  const timelineProgress = document.getElementById('timeline-progress');
+  if (timelineProgress) {
+    ScrollTrigger.create({
+      trigger: '#timeline-container',
+      start: 'top center',
+      end: 'bottom center',
+      onUpdate: (self) => {
+        timelineProgress.style.height = (self.progress * 100) + '%';
+      }
+    });
+  }
+}
+
+// ========== CONTACT FORM ==========
+function handleSubmit(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submit-btn');
+  const text = document.getElementById('submit-text');
+  text.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Message Sent!';
+  btn.style.background = '#10B981';
+  showToast('Message sent successfully!');
+  setTimeout(() => {
+    text.textContent = 'Send Message';
+    btn.style.background = '#2563EB';
+    e.target.reset();
+  }, 3000);
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateX(-50%) translateY(0)';
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 2500);
+}
+
+// ========== MAGNETIC BUTTONS ==========
+document.querySelectorAll('.magnetic-btn').forEach(btn => {
+  btn.addEventListener('mousemove', (e) => {
+    const rect = btn.getBoundingClientRect();
+    const x = (e.clientX - rect.left - rect.width/2) * 0.2;
+    const y = (e.clientY - rect.top - rect.height/2) * 0.2;
+    btn.style.transform = `translate(${x}px, ${y}px)`;
+  });
+  btn.addEventListener('mouseleave', () => {
+    btn.style.transform = 'translate(0,0)';
+  });
+});
+
+// ========== INIT ==========
+window.addEventListener('load', () => {
+  initParticles();
+  setTimeout(initScrollAnimations, 500);
+});
+</script>
+</body>
+</html>
